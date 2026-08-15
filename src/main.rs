@@ -1,47 +1,29 @@
-use chrono::NaiveDate;
-use clap::{Parser, Subcommand};
+mod parser;
+use clap::Parser;
 
-#[derive(Parser)]
-#[command(name = "schedule manager")]
-#[command(version, about, long_about = None)]
-struct Cli {
-    #[command(subcommand)]
-    create_task: CreateCommand,
-}
-
-#[derive(Subcommand)]
-#[command(about = "create a new task")]
-enum CreateCommand {
-    Create {
-        #[arg(short = 'n', long = "task-name")]
-        name: String,
-        #[arg(short = 'd', long = "echeance-date", value_parser = parse_date_from_str)]
-        echeance_date: NaiveDate,
-    },
-}
-
-fn parse_date_from_str(date_str: &str) -> Result<NaiveDate, String> {
-    let _date_format = "%Y-%m-%d";
-
-    match NaiveDate::parse_from_str(date_str, _date_format) {
-        Ok(parsed_date) => Ok(parsed_date),
-        Err(e) => Err(format!(
-            "Error: Invalid date format or values. Expected YYYY-MM-DD. Details: {}",
-            e
-        )),
-    }
-}
+use crate::parser::parser::{Cli, Commands, Mode};
 
 fn main() {
     let cli = Cli::parse();
 
-    match &cli.create_task {
-        CreateCommand::Create {
+    match &cli.command {
+        Commands::Create {
             name,
             echeance_date,
         } => {
             println!("taks name : {name}");
             println!("echeance date : {echeance_date}");
         }
+        Commands::List { list } => match list {
+            Mode::All => {
+                println!("all");
+            }
+            Mode::Completed => {
+                println!("completed");
+            }
+            Mode::Uncompleted => {
+                println!("uncompleted");
+            }
+        },
     }
 }
