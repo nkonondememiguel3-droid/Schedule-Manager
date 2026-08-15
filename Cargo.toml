@@ -1,6 +1,9 @@
 [package]
 name = "schedule_manager"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2024"
+about = "Manage your tasks."
 
 [dependencies]
+chrono = "0.4.45"
+clap = { version = "4.6.6", features = ["derive"] }
