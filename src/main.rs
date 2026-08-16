@@ -1,3 +1,4 @@
+mod error;
 mod model;
 mod parser;
 mod service;
@@ -7,50 +8,47 @@ use crate::parser::parser::{Cli, Commands, Mode};
 use model::task::Task;
 use service::task_manager::TaskManager;
 
-// TODO: will remove this when we're done with the error handling when opening a file.
-fn main() -> std::io::Result<()> {
+fn main() {
     let cli = Cli::parse();
 
-    let file = std::fs::OpenOptions::new()
+    let file = match std::fs::OpenOptions::new()
         .create(true)
-        .append(true)
-        .open("tasks.json")?; // TODO: handle the errors later.
+        .read(true)
+        .write(true)
+        .open("tasks.json")
+    {
+        Ok(f) => f,
+        Err(e) => {
+            eprintln!("Critical error: Could not open or create 'tasks.json': {e}");
+            std::process::exit(1);
+        }
+    };
 
-    let task_manager = TaskManager::new();
+    let mut task_manager = TaskManager::new(file);
 
     match &cli.command {
         Commands::Create {
             name,
             echeance_date,
         } => {
-            let new_task = Task::new(name.to_string(), *echeance_date);
-            match new_task {
+            match Task::new(name.to_string(), *echeance_date) {
                 Ok(new_task) => {
-                    println!("{new_task}");
-                    let _ = task_manager.save_task(&new_task, file); // TODO: handle the errors later.
+                    println!("successfully created : {new_task}"); // TODO: will need login later
+                    // for monitoring
+                    if let Err(e) = task_manager.save_task(&new_task) {
+                        eprintln!("Failed to save the task to the file: {}", e);
+                    }
                 }
-                Err(_) => {
-                    // TODO:: handle the error later.
-                    eprintln!(
-                        "Their is an error in the creation of your task.\nIt will ba handle in the later version of the tool.\nSorry for that."
-                    );
+                Err(e) => {
+                    eprintln!("Task creation failed: {e}");
                 }
             }
         }
 
         Commands::List { list } => match list {
             Mode::All => {
-                println!("all");
-                match task_manager.load_tasks(file) {
-                    Ok(tasks) => {
-                        for taks in tasks {
-                            println!("{taks}")
-                        }
-                    }
-                    Err(_) => {
-                        // TODO: handle the error later.
-                        eprintln!("Failed to load the tasks.");
-                    }
+                if let Err(e) = task_manager.list_tasks() {
+                    eprintln!("Failed to load or list the tasks: {}", e);
                 }
             }
             Mode::Completed => {
@@ -61,7 +59,4 @@ fn main() -> std::io::Result<()> {
             }
         },
     }
-
-    // TODO: will remove this when we're done with the error handling when opening a file.
-    Ok(())
 }

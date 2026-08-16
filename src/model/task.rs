@@ -3,13 +3,15 @@ use chrono::prelude::*;
 use core::fmt;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+use crate::error::creation_error::CreationError;
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Task {
-    task_name: String,
-    completed: bool,
-    create_date: NaiveDate,
-    echeance_date: NaiveDate,
-    completed_date: Option<NaiveDate>,
+    pub task_name: String,
+    pub completed: bool,
+    pub create_date: NaiveDate,
+    pub echeance_date: NaiveDate,
+    pub completed_date: Option<NaiveDate>,
 }
 
 impl fmt::Display for Task {
@@ -34,7 +36,6 @@ impl fmt::Display for Task {
 impl Task {
     pub fn new(task_name: String, echeance_date: NaiveDate) -> Result<Self, CreationError> {
         if echeance_date < Utc::now().date_naive() {
-            // TODO: handle error
             return Err(CreationError::WrongEcheanceDate);
         }
 
@@ -46,10 +47,4 @@ impl Task {
             completed_date: None,
         })
     }
-}
-
-// TODO: will see later how to make this a global error system.
-#[derive(Debug)]
-pub enum CreationError {
-    WrongEcheanceDate,
 }
