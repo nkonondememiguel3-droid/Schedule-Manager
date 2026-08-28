@@ -22,6 +22,8 @@ impl TaskManager {
         let mut json_string =
             serde_json::to_string(task).map_err(CreationError::SerializationError)?;
 
+        json_string.push('\n');
+
         // make sure to write at the very end of the file
         self.json_file
             .seek(std::io::SeekFrom::End(0))

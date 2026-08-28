@@ -35,12 +35,13 @@ pub enum Mode {
 }
 
 pub(crate) fn parse_date_from_str(date_str: &str) -> Result<NaiveDate, String> {
-    let _date_format = "%Y-%m-%d";
+    // let _date_format = "%Y-%m-%d";
+    let _date_format = "%Y-%m-%dT%H:%M:%S%z";
 
     match NaiveDate::parse_from_str(date_str, _date_format) {
         Ok(parsed_date) => Ok(parsed_date),
         Err(e) => Err(format!(
-            "Error: Invalid date format or values. Expected YYYY-MM-DD. Details: {}",
+            "Error: Invalid date format or values. Expected YYYY-MM-DD H:M:S. Details: {}",
             e
         )),
     }
