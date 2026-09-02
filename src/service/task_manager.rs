@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader, Seek, Write};
 
-use crate::Task;
+use crate::model::task::Task;
 use crate::error::creation_error::CreationError;
 use crate::error::loading_error::LoadingError;
 
